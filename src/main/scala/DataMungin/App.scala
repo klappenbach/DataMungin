@@ -4,7 +4,12 @@ import io.Source
 
 object App extends App {
   val filePath = args.headOption.getOrElse("weather.dat")
-  val statsLines = for (line <- Source.fromFile(filePath).getLines() if line.trim.nonEmpty && line.trim.head.isDigit ) yield line.trim()
-  val spreadPerDay = for(line <- statsLines) yield (line.split("\\D+")(0).toInt, line.split("\\D+")(1).toInt - line.split("\\D+")(2).toInt)
+  val lines = Source.fromFile(filePath).getLines()
+  val statsLines = lines.filter(s => s.trim.nonEmpty && s.trim.head.isDigit).map(_.trim)
+  val spreadPerDay = statsLines.map(line => {
+    val split = line.split("\\D+")
+    val temperatureSpreadOfDay = split(1).toInt - split(2).toInt
+    (split(0).toInt, temperatureSpreadOfDay)
+  })
   println(spreadPerDay.toList.sortWith( (x,y)  => x._2 < y._2).head._2 )
 }
